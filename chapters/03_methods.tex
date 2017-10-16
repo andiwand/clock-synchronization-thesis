@@ -64,7 +64,7 @@ Future versions of NTP may bring a 128 bit timestamp, with a 64 bit seconds and 
 	% https://upload.wikimedia.org/wikipedia/commons/8/8d/NTP-Algorithm.svg
 \end{figure}
 
-With NTP the client has the full control of the synchronization process. He can poll different servers on diverse networks to synchronize his clock. As we can see in figure \ref{fig:ntp_algorithm}, the client has 4 timestamps after such a poll. He can then calculate the time offset θ and the round-trip delay δ.
+With NTP the client has the full control of the synchronization process. He can poll different servers on diverse networks to synchronize his clock. As we can see in Figure \ref{fig:ntp_algorithm}, the client has 4 timestamps after such a poll. He can then calculate the time offset θ and the round-trip delay δ.
 
 \[ \theta = \frac{(t_1 - t_0) + (t_2 - t_3)}{2} \]
 \[ \delta = (t_3 - t_0) - (t_2 - t_1) \]

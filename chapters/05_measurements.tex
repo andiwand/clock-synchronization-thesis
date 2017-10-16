@@ -25,10 +25,21 @@ The OS delay was measured with the tool cyclictest, which was described before.
 This is a plot of the probability density over the delay. Where "rt kernel" stands for the PREEMPT\_RT patched and "std kernel" for the mainline kernel.
 As we can see, the PREEMPT\_RT patch gives us a better delimitation but the mainline kernel provides a higher peak with 88\% at 10 µs.
 
-% table
+\begin{center}
+    \begin{tabular}{ | l | r | r | }
+    \hline
+    \textbf{Target} & \textbf{Average} [ms] & \textbf{Standard deviation} [ms] \\ \hline
+    localhost & 179 & 24 \\ \hline
+    lan & 664 & 69 \\ \hline
+    internet & 25634 & 213 \\ \hline
+    \end{tabular}
+\end{center}
 
 Issued command:
+
+\begin{lstlisting}[language=bash]
 rt-tests/cyclictest -m -t1 -p 99 -n -i 400 -l 10000000 -q -H 400
+\end{lstlisting}
 
 \subsection{GPIO delay}
 
@@ -45,14 +56,19 @@ The enveloping gaussians are parameterized as the following:
 % plot
 
 The static CPU frequency was configured by adding the following lines to /boot/config.txt:
-\# static frequency
-force\_turbo=1
-arm\_freq=800
-arm\_freq\_min=800
+\begin{lstlisting}[language=bash]
+# static frequency
+force_turbo=1
+arm_freq=800
+arm_freq_min=800
+\end{lstlisting}
 
 Issued commands:
-time-tools/measure-server -i 0.5 \&
-time-tools/measure-client 127.0.0.1 \&
+
+\begin{lstlisting}[language=bash]
+time-tools/measure-server -i 0.5 &
+time-tools/measure-client 127.0.0.1 &
+\end{lstlisting}
 
 \subsection{Network delay}
 
@@ -67,7 +83,10 @@ The enveloping gaussians are parameterized as the following:
 % table
 
 Issued command:
+
+\begin{lstlisting}[language=bash]
 delay-icmp <host>
+\end{lstlisting}
 
 \subsection{NMEA delay}
 
@@ -76,69 +95,115 @@ Since the GPS module has two different transmission methods to emit a second, a 
 The delay was measured with: 435 +/- 89 ms
 
 Issued command:
-delay-nmea -s ~/time-experiments.c/nmea\_pulse /dev/ttyS0 ~/time-experiments.c/pps\_pulse /dev/pps0
+
+\begin{lstlisting}[language=bash]
+delay-nmea -s ~/time-experiments.c/nmea_pulse /dev/ttyS0 ~/time-experiments.c/pps_pulse /dev/pps0
+\end{lstlisting}
 
 \section{Time vs time}
 
 The following measurements were taken to see the moving time offset of connected Raspberry Pis to a chosen norm. With the help of that we can visualize the process of time synchronization with a resolution of a few µs.
 
-The three Raspberry Pis were called "rpi1", "rpi2" and "rpi3". "rpi1" was chosen to be the server and therefore the norm to compare to. The two GPS modules were connected to "rpi1" and "rpi2". In order to measure the time accurately the server is connected to all his clients with per GPIO and Ethernet. A digital pulse is emitted by "rpi1" to the others. The clients take a timestamp and send it back to the server over UDP.
+The three Raspberry Pis were called \textit{rpi1}, \textit{rpi2} and \textit{rpi3}. \textit{rpi1} was chosen to be the server and therefore the norm to compare to. The two GPS modules were connected to \textit{rpi1} and \textit{rpi2}. In order to measure the time accurately the server is connected to all his clients with per GPIO and Ethernet. A digital pulse is emitted by \textit{rpi1} to the others. The clients take a timestamp and send it back to the server over UDP.
 
 Before the measurement is started, the client clocks are synchronized to be within 1-2 seconds and the kernel clock parameters are screwed.
 
 This is a summary of the required measurement commands:
 
-Issued server commands:
+\begin{lstlisting}[language=bash]
+# server commands
 time-tools/measure-server -i 0.5
 time-config time-tools/tconfig/config-...
 
-Issued client commands:
+# client commands
 time-tools/tsync rpi1 1
 time-tools/screwclock
 time-tools/measure-client rpi1
 time-config time-tools/tconfig/config-...
+\end{lstlisting}
 
 At first we will see how an unsynchronized clocks behaves. Followed by using NTP, PTP and GPS. After that we will compare them in the next chapter. All following measurements were taken with the mainline kernel and static frequency.
 
 \subsection{Nonlinear deviation}
 
-This measurement was taken to see what happens to a clock without a continuous synchronization.
+This measurement was taken to see what happens to a clock without a continuous synchronization. It is summarized in Figure \ref{fig:plot_nonlinear}.
 
-% plot
+\begin{figure}[tb]
+	\centering
+	\includegraphics[width=1.0\textwidth]{figures/plot_nonlinear.png}
+	\caption{Nonlinear deviation}
+	\label{fig:plot_nonlinear}
+\end{figure}
 
-The reference clock "rpi1" was synchronized by GPS while the clock of "rpi3" was on its own. With about 3 days of measuring and the accompanying temperature fluctuations we can see that clock synchronization needs both: phase and frequency adjustment.
+The reference clock \textit{rpi1} was synchronized by GPS while the clock of \textit{rpi3} was on its own. With about 3 days of measuring and the accompanying temperature fluctuations we can see that clock synchronization needs both: phase and frequency adjustment.
 The measurement was started at 12:00 AM. We can see that the clock frequency is connected to the changing ambient temperature caused by the day cycle and weather.
 
 \subsection{NTP}
 
-The following measurement was taken with "rpi1" as reference clock, "rpi2" and "rpi3" as synchronization targets.
+The following measurement was taken with \textit{rpi1} as reference clock, \textit{rpi2} and \textit{rpi3} as synchronization targets.
 
-% plot
+\begin{figure}[tb]
+	\centering
+	\includegraphics[width=1.0\textwidth]{figures/plot_ntp1.png}
+	\caption{NTP synchronization}
+	\label{fig:plot_ntp1}
+\end{figure}
 
-With the initiation of the NTP daemon the target clock's phase is adjusted to about 0.1 ms relative to the reference clock. Then the frequency adjustment begins. In this case the target’s clock frequency is very badly conditioned in comparison to the reference. NTP took about 14 h to fix this issue and to reach an accuracy of about 0.2 ms.
+We can see the synchronization process in Figure \ref{fig:plot_ntp1}. With the initiation of the NTP daemon the target clock's phase is adjusted to about 0.1 ms relative to the reference clock. Then the frequency adjustment begins. In this case the target’s clock frequency is very badly conditioned in comparison to the reference. NTP took about 14 h to fix this issue. Figure \ref{fig:plot_ntp2} shows the continuous time oscillation after the synchronization is done. This leads to an accuracy of about 0.2 ms.
 
-% plot
+\begin{figure}[tb]
+	\centering
+	\includegraphics[width=1.0\textwidth]{figures/plot_ntp2.png}
+	\caption{NTP accuracy}
+	\label{fig:plot_ntp2}
+\end{figure}
 
 \subsection{PTP}
 
-The logical setup is the same as before: "rpi1" as reference clock, "rpi2" and "rpi3" as synchronization targets.
+The logical setup is the same as before: \textit{rpi1} as reference clock, \textit{rpi2} and \textit{rpi3} as synchronization targets.
 
-% plot
+\begin{figure}[tb]
+	\centering
+	\includegraphics[width=1.0\textwidth]{figures/plot_ptp1.png}
+	\caption{PTP synchronization}
+	\label{fig:plot_ptp1}
+\end{figure}
 
-With the initiation of the PTP daemon the target’s clock phase is adjusted to about 0.1 ms relative to the reference clock. The frequency adjustment takes over and completes in about 6 minutes. The accuracy gets very close to the measurement error with about 10 µs.
+With the initiation of the PTP daemon the target’s clock phase is adjusted to about 0.1 ms relative to the reference clock like shown in Figure \ref{fig:plot_ptp1}. The frequency adjustment takes over and completes in about 6 minutes. The accuracy gets very close to the measurement error with about 10 µs as we can see in Figure \ref{fig:plot_ptp2}.
 
-% plot
+\begin{figure}[tb]
+	\centering
+	\includegraphics[width=1.0\textwidth]{figures/plot_ptp2.png}
+	\caption{PTP accuracy}
+	\label{fig:plot_ptp2}
+\end{figure}
 
 \subsection{GPS}
 
-To get an estimate of the error, two GPS modules are required in order to compare them. "rpi1" was started and synchronized long before "rpi2". With this way we have a stable reference to compare to and follow the initial time synchronization of "rpi2".
+To get an estimate of the error, two GPS modules are required in order to compare them. \textit{rpi1} was started and synchronized long before \textit{rpi2}. With this way we have a stable reference to compare to and follow the initial time synchronization of \textit{rpi2}.
 
-% plot
-% plot
+\begin{figure}[tb]
+	\centering
+	\includegraphics[width=1.0\textwidth]{figures/plot_gps1.png}
+	\caption{GPS synchronization}
+	\label{fig:plot_gps1}
+\end{figure}
 
-The initiation of the NTP daemon with GPS configuration adjusts the phase to about 10 ms relative to the reference clock. The high error comes from the serial connection. NTP starts using the serial interface first and heads over to PPS after analyzing the signal. After about 2 minutes the PPS signal gets accepted, followed by a slow converging curve towards reference within about 90 minutes.
+\begin{figure}[tb]
+	\centering
+	\includegraphics[width=1.0\textwidth]{figures/plot_gps2.png}
+	\caption{GPS synchronization close-up}
+	\label{fig:plot_gps2}
+\end{figure}
 
-% plot
+The initiation of the NTP daemon with GPS configuration adjusts the phase to about 10 ms relative to the reference clock like shown in Figure \ref{fig:plot_gps1}. The high error comes from the serial connection. NTP starts using the serial interface first and heads over to PPS after analyzing the signal. After about 2 minutes the PPS signal gets accepted, followed by a slow converging curve towards reference within about 90 minutes shown in Figure \ref{fig:plot_gps2}.
 
-In the end we reach an accuracy close to the measurement error of about 10 µs.
+\begin{figure}[tb]
+	\centering
+	\includegraphics[width=1.0\textwidth]{figures/plot_gps3.png}
+	\caption{GPS accuracy}
+	\label{fig:plot_gps3}
+\end{figure}
+
+In the end we reach an accuracy close to the measurement error of about 10 µs illustrated by Figure \ref{fig:plot_gps3}.
 
