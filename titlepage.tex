@@ -5,7 +5,6 @@
 \define@cmdkey{thesisTitlePage}{prof}[Professor]{}
 \define@cmdkey{thesisTitlePage}{address}[Adresse]{}
 \define@cmdkey{thesisTitlePage}{type}[Typ der Arbeit]{}
-\define@cmdkey{thesisTitlePage}{backwhite}[TU Logo in Schwarz-Weiss]{}
 \newcommand{\setThesisTitlePage}[1]{\setkeys{thesisTitlePage}{#1}}
 
 % Default Werte für die Variablen
@@ -33,9 +32,7 @@
 	% Upper part of the page
 	\begin{figure}[h]
 		\centering
-			\IfStrEq{\cmdKV@thesisTitlePage@backwhite}{true}%
-			{\includegraphics[width=0.5\textwidth]{figures/tu_wien_logo_sw.pdf}}%
-			{\includegraphics[width=0.5\textwidth]{figures/tu_wien_logo.pdf}}
+			\includegraphics[width=0.5\textwidth]{figures/tu_wien_logo.pdf}
 		 %Logo gracefully taken from http://www.tuwien.ac.at/dle/pr/publishing_web_print/corporate_design/tu_logo/
 	\end{figure}
 	

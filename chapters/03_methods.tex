@@ -37,6 +37,7 @@ The current version of the protocol is 4 (NTPv4), which is documented in RFC 590
 	\includegraphics[width=0.7\textwidth]{figures/ntp_strata.png}
 	\caption{Example of a NTP topology. The yellow arrows indicate a direct connection and the red ones a network connection.}
 	\label{fig:ntp_strata}
+	% https://upload.wikimedia.org/wikipedia/commons/c/c9/Network_Time_Protocol_servers_and_clients.svg
 \end{figure}
 
 NTP has a hierarchical structure of time sources. The different levels are called "stratum" and have a number from 0 to 16 assigned. This number represents the distance to the reference clock and is also used to prevent cyclical dependencies. The stratum should not be confused with the quality of the clock since this is not always true. There are stratum 3 servers providing higher quality than stratum 2 servers caused by lower latency for example. Stratum 16 indicates a unsynchronized device.
@@ -60,6 +61,7 @@ Future versions of NTP may bring a 128 bit timestamp, with a 64 bit seconds and 
 	\includegraphics[width=0.7\textwidth]{figures/ntp_algorithm.png}
 	\caption{Measurement process of the different timestamps}
 	\label{fig:ntp_algorithm}
+	% https://upload.wikimedia.org/wikipedia/commons/8/8d/NTP-Algorithm.svg
 \end{figure}
 
 With NTP the client has the full control of the synchronization process. He can poll different servers on diverse networks to synchronize his clock. As we can see in figure \ref{fig:ntp_algorithm}, the client has 4 timestamps after such a poll. He can then calculate the time offset θ and the round-trip delay δ.
