@@ -1,0 +1,43 @@
+\begin{lstlisting}[label=lst:env, language=bash, caption=Measurement environment]
+# install requirements
+apt install build-essential libnuma-dev
+apt install vim git screen adjtimex ptpd
+apt install python python-pip python3 python3-pip
+
+# update pip
+pip2 install --upgrade pip setuptools
+pip3 install --upgrade pip setuptools
+
+# disable services
+systemctl stop ntp
+systemctl stop ptpd
+systemctl disable ntp
+systemctl disable ptpd
+
+vim /boot/config.txt
+### add lines
+# static frequency
+force_turbo=1
+boot_delay=1
+arm_freq=800
+arm_freq_min=800
+
+vim /etc/dhcp/dhclient.conf
+### remove "ntp-servers" from "requests"
+
+# install cyclictest
+git clone git://git.kernel.org/pub/scm/utils/rt-tests/rt-tests.git
+cd rt-tests
+git checkout stable/v1.0
+make cyclictest
+cd ..
+
+# install custom tools
+pip3 install https://github.com/andiwand/time-config/archive/master.zip
+pip3 install https://github.com/andiwand/time-experiments/archive/master.zip
+git clone https://github.com/andiwand/time-experiments.c.git && cd time-experiments.c && make && cd ..
+git clone https://github.com/andiwand/time-tools.git
+pip3 install https://github.com/andiwand/time-analysis/archive/master.zip
+
+# copy the gpio-netlink kernel module into the current directory
+\end{lstlisting}

@@ -1,0 +1,19 @@
+%problem statement (which problem should be solved?)
+%aim of the work
+%methodological approach
+%structure of the work
+
+\section{Why is clock synchronization needed?}
+
+Clock synchronization is a very important topic for distributed systems and security in those. Since "Public Devices" is related to both of these, it is indispensable to resolve time differences as fast and accurate as possible. For Secure Sockets Layer (SSL) or Transport Layer Security (TLS) clock synchronization has the job of telling if a certificate or Certificate Revocation List (CRL) is used in its valid time range (\textit{notBefore} and \textit{notAfter} for the certificate, and \textit{thisUpdate} and \textit{nextUpdate} for the CRL).
+
+Moreover, it is also important for distributed systems if time matters. For example a file server would store the modified date taken from its own clock. So if the client thinks it is 00:00:00 UTC on 1 January 1970 and the server’s clock is 1 year ahead, the server would insert its own time to the file, which could confuse the client.
+
+Nearly all scientific measurements are related to time. This makes clock synchronization crucial for a distributed measurement software like Public Devices.
+
+\section{Public Devices}
+
+The "Public Devices" project was founded by Prof. Dr. Martin Gröschl (Project Leader) and Gerald Pechoc (Chief Developer) with the aim of defining a framework of hard- and software, making it easier for experimenters to manage their measurement and control tasks.
+
+The major goals are flexibility, simplicity, efficiency, reusability and achievability. Besides that it should consist of open source software (like Linux) and use open communication standards (like Ethernet, I2C and SPI). The hardware can be any inexpensive, popular single-board computer (like Raspberry Pi, Banana Pi, Mojo, Arduino, Parallela). Both, open software and hardware, comes with a lot of knowledge and support on the internet and provides a robust base for a distributed measurement system.
+

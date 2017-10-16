@@ -1,0 +1,51 @@
+\section{Wiring}
+
+\begin{center}
+    \begin{tabular}{ | l | l | }
+    \hline
+    \textbf{Ultimate GPS Breakout v3} & \textbf{Raspberry Pi 3} \\ \hline
+    VIN & Any 3V3 or 5V \\ \hline
+    GND & Any ground \\ \hline
+    TX & Pin 10 | GPIO 15 | UART0\_RXD \\ \hline
+    RX & Pin  8 | GPIO 14 | UART0\_TXD \\ \hline
+    PPS & Pin 12 | GPIO 12 | PCM\_CLK \\ \hline
+    \end{tabular}
+\end{center}
+
+\section{GPS configuration}
+
+\begin{lstlisting}[label=lst:gps, language=bash, caption=GPS configuration]
+# install requirements
+apt-get install picocom pps-tools
+apt-get install gpsd gpsd-clients python-gps
+
+vim /boot/config.txt
+### remove lines:
+console=serial0,115200
+### add lines:
+# gps
+dtoverlay=pps-gpio,gpiopin=18
+enable_uart=1
+
+echo "pps-gpio" >> /etc/modules
+
+# configure pps dev files
+echo -n '' > /etc/udev/rules.d/10-pps.rules
+echo 'KERNEL=="ttyS0", SYMLINK+="gps0"' >> /etc/udev/rules.d/10-pps.rules
+echo 'KERNEL=="pps0", OWNER="root", GROUP="tty", MODE="0660", SYMLINK+="gpspps0"' >> /etc/udev/rules.d/10-pps.rules
+
+# configure gpsd
+echo -n '' > /etc/default/gpsd
+echo 'START_DAEMON="true"' >> /etc/default/gpsd
+echo 'GPSD_OPTIONS="-n"' >> /etc/default/gpsd
+echo 'DEVICES="/dev/gps0"' >> /etc/default/gpsd
+echo 'USBAUTO="false"' >> /etc/default/gpsd
+
+# compile ntp with pps and gps support
+cd /usr/src
+wget http://archive.ntp.org/ntp4/ntp-4.2/ntp-4.2.8p8.tar.gz
+tar -zxvf ntp-4.2.8p8.tar.gz
+cd ntp-4.2.8p8
+./configure
+make && make install
+\end{lstlisting}

@@ -1,0 +1,55 @@
+\begin{lstlisting}[label=lst:kernel, language=bash, caption=Kernel compilation]
+# create kernel directory
+mkdir -p tmp/boot
+mkdir -p tmp/lib/modules
+
+# get the cross compilation toolchain
+git clone https://github.com/raspberrypi/tools.git
+export ARCH=arm
+export CROSS_COMPILE=$(pwd)/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
+export INSTALL_MOD_PATH=$(pwd)/tmp/lib/modules
+
+# get the kernel source
+git clone https://github.com/raspberrypi/linux.git
+cd linux
+git checkout rpi-4.6.y
+
+# for PREEMPT_RT continue here
+# first have a look at the Makefile. VERSION, PATCHLEVEL, and SUBLEVEL define the kernel version.
+wget https://www.kernel.org/pub/linux/kernel/projects/rt/4.6/patch-4.6.7-rt14.patch.gz
+zcat patch-4.6.7-rt14.patch.gz | patch -p1
+rm patch-4.6.7-rt14.patch.gz
+# resolve any upcoming conflicts
+# PREEMPT_RT done
+
+# configure the kernel
+export KERNEL=kernel7
+make bcm2709_defconfig
+# enable CONFIG_PREEMPT_RT_FULL and HIGH_RES_TIMERS
+make menuconfig
+
+# compile
+make zImage
+make modules
+make dtbs
+make modules_install
+
+# pack the kernel
+cd ..
+linux/scripts/mkknlimg linux/arch/arm/boot/zImage tmp/boot/$KERNEL.img
+cp linux/arch/arm/boot/dts/*.dtb tmp/boot/
+cp -r linux/arch/arm/boot/dts/overlays tmp/boot
+cd tmp
+tar -czf ../kernel.tar.gz *
+\end{lstlisting}
+
+\section{Kernel module compilation}
+
+\begin{lstlisting}[label=lst:kernel_module, language=bash, caption=Kernel module compilation]
+git clone https://github.com/andiwand/gpio-netlink.git
+cd gpio-netlink
+# set the following variables appropriately
+# CCPREFIX is used for cross compilation
+# KERNEL_SRC points to the compiled kernel source directory
+CCPREFIX=$(pwd)/../tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf- KERNEL_SRC=$(pwd)/../linux make
+\end{lstlisting}

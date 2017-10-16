@@ -1,0 +1,144 @@
+The major part of this thesis was to measure and compare the different synchronization methods and provide a selection basis. To get comparable results, the first step was to choose the hardware and OS for the measurement system. Since the hardware was already given by "Public Devices" with the Raspberry Pi 3 and Linux as the OS, the kernel was the last option to choose.
+
+All measurements were taken under optimal conditions: no CPU load, no RAM load, no storage load, no network load.
+
+\section{Setup}
+
+A detailed installation of the measurement environment is described in Appendix D. The devices connected to a GPS module additionally require the setup described in Appendix C.
+The measurements were done with three Raspberry Pis. All of them were connected over Ethernet and a switch. One of them has to transmit a measurement pulse over GPIO 3 to the others’ GPIO 2 like described in the "Time vs time" section.
+
+\section{Delays}
+
+A measurement system should provide small latency to get a sharp resolution in time. The popular PREEMPT\_RT patch promises that and was the other option besides the mainline kernel. Both were compiled as described before and swapped out for the different measurements.
+Another option to improve latency is to disable the dynamic clock speed of the CPU. This is intended to reduce the power draw in idle situations. But it will increase the latency since important measurement instructions may run on low clock speed in the first place before the kernel reacts to the rising CPU load.
+
+We can divide the delay into different parts. It starts with the internal hardware clock, the OS and the measurement software. Further parts come from the hardware interface, the signal transmission and measurement instrument itself. The aim for this thesis is to minimize the OS delay and provide an overview of interface and transmission delays.
+
+The system delay will tell us which kernel to choose. The accuracy of time synchronization is very much related to the underlying transmission method and provides a first estimation of the error. This error can then be minimized with statistical methods. The delay of the used transmission methods will give an overview.
+
+\subsection{System delay}
+
+The OS delay was measured with the tool cyclictest, which was described before.
+
+% plot
+
+This is a plot of the probability density over the delay. Where "rt kernel" stands for the PREEMPT\_RT patched and "std kernel" for the mainline kernel.
+As we can see, the PREEMPT\_RT patch gives us a better delimitation but the mainline kernel provides a higher peak with 88\% at 10 µs.
+
+% table
+
+Issued command:
+rt-tests/cyclictest -m -t1 -p 99 -n -i 400 -l 10000000 -q -H 400
+
+\subsection{GPIO delay}
+
+The general-purpose input/output (GPIO) provides a general, easy to use and fast way to generate and process digital signals. Since the Adafruit GPS module has a pulse per second (PPS) signal output, we want to know how accurate this interface is.
+To do so, two pins were shortened, one used as an output and the other as an input. Then the time difference between generating and receiving an impulse it is taken. This was repeated for a period of time to get a smooth delay distribution.
+
+% plot
+
+The measured distributions are shown in figure. Where "rt kernel" stands for the PREEMPT\_RT patch and "std kernel" for the standard mainline kernel. In addition, the CPU was configured to stay with a single frequency designated with "no throttling" and the default configuration with "throttling".
+As we can see, configuring the Raspberry Pi to not adopt the CPU’s frequency has a noticeable impact on the delay. The latency with the PREEMPT\_RT patch is not only about 6 times higher, but also more spread out. A wider distribution will also cause a higher error for a time synchronization method that relies on GPIO like GPS.
+
+The enveloping gaussians are parameterized as the following:
+
+% plot
+
+The static CPU frequency was configured by adding the following lines to /boot/config.txt:
+\# static frequency
+force\_turbo=1
+arm\_freq=800
+arm\_freq\_min=800
+
+Issued commands:
+time-tools/measure-server -i 0.5 \&
+time-tools/measure-client 127.0.0.1 \&
+
+\subsection{Network delay}
+
+The network delay is very important for NTP and PTP. The delay distribution gives a first estimation of the synchronization error. With the assumption that the delay is the same in both directions and it doesn’t vary too much, the error can be reduced by statistical methods like described in the NTP and PTP chapter.
+
+% plot
+
+The measured distributions are shown in figure. The localhost measured to get an idea of what delay is caused by the OS itself. For a LAN attached device we get a similar distribution like "lan". It fits the gaussian distribution very well.
+
+The enveloping gaussians are parameterized as the following:
+
+% table
+
+Issued command:
+delay-icmp <host>
+
+\subsection{NMEA delay}
+
+Since the GPS module has two different transmission methods to emit a second, a calibration is required. While the PPS line gives us a single digital pulse when a UTC second has started, the serial line tells us which second it was. The delay between those two can be measured and passed to the NTP daemon.
+
+The delay was measured with: 435 +/- 89 ms
+
+Issued command:
+delay-nmea -s ~/time-experiments.c/nmea\_pulse /dev/ttyS0 ~/time-experiments.c/pps\_pulse /dev/pps0
+
+\section{Time vs time}
+
+The following measurements were taken to see the moving time offset of connected Raspberry Pis to a chosen norm. With the help of that we can visualize the process of time synchronization with a resolution of a few µs.
+
+The three Raspberry Pis were called "rpi1", "rpi2" and "rpi3". "rpi1" was chosen to be the server and therefore the norm to compare to. The two GPS modules were connected to "rpi1" and "rpi2". In order to measure the time accurately the server is connected to all his clients with per GPIO and Ethernet. A digital pulse is emitted by "rpi1" to the others. The clients take a timestamp and send it back to the server over UDP.
+
+Before the measurement is started, the client clocks are synchronized to be within 1-2 seconds and the kernel clock parameters are screwed.
+
+This is a summary of the required measurement commands:
+
+Issued server commands:
+time-tools/measure-server -i 0.5
+time-config time-tools/tconfig/config-...
+
+Issued client commands:
+time-tools/tsync rpi1 1
+time-tools/screwclock
+time-tools/measure-client rpi1
+time-config time-tools/tconfig/config-...
+
+At first we will see how an unsynchronized clocks behaves. Followed by using NTP, PTP and GPS. After that we will compare them in the next chapter. All following measurements were taken with the mainline kernel and static frequency.
+
+\subsection{Nonlinear deviation}
+
+This measurement was taken to see what happens to a clock without a continuous synchronization.
+
+% plot
+
+The reference clock "rpi1" was synchronized by GPS while the clock of "rpi3" was on its own. With about 3 days of measuring and the accompanying temperature fluctuations we can see that clock synchronization needs both: phase and frequency adjustment.
+The measurement was started at 12:00 AM. We can see that the clock frequency is connected to the changing ambient temperature caused by the day cycle and weather.
+
+\subsection{NTP}
+
+The following measurement was taken with "rpi1" as reference clock, "rpi2" and "rpi3" as synchronization targets.
+
+% plot
+
+With the initiation of the NTP daemon the target clock's phase is adjusted to about 0.1 ms relative to the reference clock. Then the frequency adjustment begins. In this case the target’s clock frequency is very badly conditioned in comparison to the reference. NTP took about 14 h to fix this issue and to reach an accuracy of about 0.2 ms.
+
+% plot
+
+\subsection{PTP}
+
+The logical setup is the same as before: "rpi1" as reference clock, "rpi2" and "rpi3" as synchronization targets.
+
+% plot
+
+With the initiation of the PTP daemon the target’s clock phase is adjusted to about 0.1 ms relative to the reference clock. The frequency adjustment takes over and completes in about 6 minutes. The accuracy gets very close to the measurement error with about 10 µs.
+
+% plot
+
+\subsection{GPS}
+
+To get an estimate of the error, two GPS modules are required in order to compare them. "rpi1" was started and synchronized long before "rpi2". With this way we have a stable reference to compare to and follow the initial time synchronization of "rpi2".
+
+% plot
+% plot
+
+The initiation of the NTP daemon with GPS configuration adjusts the phase to about 10 ms relative to the reference clock. The high error comes from the serial connection. NTP starts using the serial interface first and heads over to PPS after analyzing the signal. After about 2 minutes the PPS signal gets accepted, followed by a slow converging curve towards reference within about 90 minutes.
+
+% plot
+
+In the end we reach an accuracy close to the measurement error of about 10 µs.
+

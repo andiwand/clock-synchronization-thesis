@@ -1,0 +1,4 @@
+The delay measurements made clear that, at least for version 4.6.7, the mainline kernel is the better option in terms of latency if higher outliers are acceptable. Besides, the dynamic CPU frequency stepping has a similar disadvantage and should be avoided if the power consumption isn’t that relevant.
+
+For time synchronization in a local switched network PTP is the best choice. It has the fastest convergence and the accuracy is comparable to GPS. If the absolute time should be accurate is required, a GPS module as PTP source would be the best solution. While GPS converges in about 90 minutes, the target clocks would have already completed the synchronization process and keep the 10 µs accuracy to the time source.
+

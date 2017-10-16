@@ -1,0 +1,87 @@
+\documentclass[12pt,a4paper,twoside,open=right,bibliography=totoc,BCOR=10mm]{scrreprt} % Schriftgröße, Seitenformat, Zweiseitig für Seitenränder, Bindcorrection
+\input{header.tex}
+\input{titlepage.tex}
+\writeIn{english} % Siehe header.tex. Setzt Dokumentsprache und damit Sprache von "Abstract", "Inhaltsverzeichnis", Datumsangaben etc.
+
+\hypersetup{ % Setzt einige Werte die in den Eigenschaften des PDF gespeichert sind.
+	pdfauthor = {Andreas Stefl},
+	pdftitle = {Time Synchronization},
+	pdfsubject = {Bachelor thesis physics},
+	pdfkeywords = {},
+	pdfdisplaydoctitle = true,
+	colorlinks = true, % Für Druck auf "false" setzen!
+}
+\addbibresource{references.bib}
+\begin{document}
+
+\setThesisTitlePage{
+	title={Time Synchronization},
+	institute={Institute of Applied Physics (IAP)},
+	prof={Ao.Univ.Prof. Dipl.-Ing. Dr.techn. Martin Gröschl\\Ing. Gerald Pechoc},
+	author={Andreas Stefl},
+	address={},
+	type={bacc},
+	% Vordefinierte Typen sind: sem (Seminararbeit), bacc (Bachelorarbeit), proj (Projektarbeit), mast (Diplomarbeit), dipl (Diplomarbeit), diss (Dissertation)
+	% Laut Auskunft des Dekants muss auch eine Masterarbeit den Titel "Diplomarbeit" tragen.
+	% Bei allen anderen Typen werden die Texte direkt übernommen.
+	backwhite=false % Definiert, ob das Logo der TU in Schwarz-Weiß oder Farbe ist.
+}
+
+\pagenumbering{gobble} % Keine Seitenzahl drucken
+\thesisTitlePage
+
+\input{chapters/00_abstract.tex}
+
+\tableofcontents \newpage
+\cleardoublepage % Macht, dass openright funktioniert.
+% \chapter macht das automatisch, \tableofcontents und \printbibliography machen das nicht.
+% Falls es Probleme gibt hilft auch der Befehl \blankpage (siehe header.tex)
+\pagenumbering{arabic} \setcounter{page}{1}
+
+\chapter{Motivation}
+\label{ch:motivation}
+\input{chapters/01_motivation.tex}
+
+\chapter{Background}
+\label{ch:background}
+\input{chapters/02_background.tex}
+
+\chapter{Methods}
+\label{ch:methods}
+\input{chapters/03_methods.tex}
+
+\chapter{Implementation}
+\label{ch:impl}
+\input{chapters/04_implementation.tex}
+
+\chapter{Measurements}
+\label{ch:measurements}
+\input{chapters/05_measurements.tex}
+
+\chapter{Conclusion}
+\label{ch:conclusion}
+\input{chapters/06_conclusion.tex}
+
+\chapter{Outlook}
+\label{ch:outlook}
+\input{chapters/07_outlook.tex}
+
+\cleardoublepage
+\pagenumbering{roman} \setcounter{page}{1}
+\printbibliography
+
+\appendix
+
+\chapter{Kernel compilation}
+\label{ap:kernel}
+\input{chapters/a_kernel_compilation.tex}
+
+\chapter{GPS configuration}
+\label{ap:gps}
+\input{chapters/b_gps_configuration.tex}
+
+\chapter{Measurement environment}
+\label{ap:environment}
+\input{chapters/c_measurement_environment.tex}
+
+\end{document}
