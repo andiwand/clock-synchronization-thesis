@@ -1,4 +1,12 @@
-The delay measurements made clear that, at least for version 4.6.7, the mainline kernel is the better option in terms of latency if higher outliers are acceptable. Besides, the dynamic CPU frequency stepping has a similar disadvantage and should be avoided if the power consumption isn’t that relevant.
+The delay measurements made clear that, at least for kernel version 4.6.7, mainline is the better option in terms of latency if higher outliers are acceptable. Besides, the dynamic CPU frequency stepping has a similar disadvantage and should be avoided if the power consumption isn’t that relevant.
 
 For time synchronization in a local switched network PTP is the best choice. It has the fastest convergence and the accuracy is comparable to GPS. If the absolute time should be accurate is required, a GPS module as PTP source would be the best solution. While GPS converges in about 90 minutes, the target clocks would have already completed the synchronization process and keep the 10 µs accuracy to the time source.
 
+There are always possible improvements. I want to discuss some of them here.
+First, the delay measurements were always taken without any CPU load. It would be interesting if the PREEMPT\_RT patch performs better with higher load or just isn’t applicable for "Public Devices".
+
+Another improvement would be to always use a GPS module with the server. This would remove frequency fluctuations and provide a better ground truth.
+
+Besides the mentioned time synchronization methods there would also be the option to use the PPS signal on multiple devices. But since NTP has such a slow convergence, PTP would be the better solution.
+
+Further, all measurements were taken with the same kernel version. It could be that a newer kernel or PREEMPT\_RT patch performs differently. Therefore I suggest to repeat the measurements to find the best solution for a specific version.

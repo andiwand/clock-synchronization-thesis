@@ -9,7 +9,7 @@ The measurements were done with three Raspberry Pis. All of them were connected 
 
 \section{Delays}
 
-A measurement system should provide small latency to get a sharp resolution in time. The popular PREEMPT\_RT patch promises that and was the other option besides the mainline kernel. Both were compiled as described before and swapped out for the different measurements.
+A measurement system should provide small latency to get a sharp resolution in time. The popular PREEMPT\_RT patch promises that and was the other option besides the mainline kernel. Both were compiled as described before and exchanged for the different measurements.
 Another option to improve latency is to disable the dynamic clock speed of the CPU. This is intended to reduce the power draw in idle situations. But it will increase the latency since important measurement instructions may run on low clock speed in the first place before the kernel reacts to the rising CPU load.
 
 We can divide the delay into different parts. It starts with the internal hardware clock, the OS and the measurement software. Further parts come from the hardware interface, the signal transmission and measurement instrument itself. The aim for this thesis is to minimize the OS delay and provide an overview of interface and transmission delays.
@@ -44,7 +44,7 @@ rt-tests/cyclictest -m -t1 -p 99 -n -i 400 -l 10000000 -q -H 400
 \subsection{GPIO delay}
 
 The general-purpose input/output (GPIO) provides a general, easy to use and fast way to generate and process digital signals. Since the Adafruit GPS module has a pulse per second (PPS) signal output, we want to know how accurate this interface is.
-To do so, two pins were shortened, one used as an output and the other as an input. Then the time difference between generating and receiving an impulse it is taken. This was repeated for a period of time to get a smooth delay distribution.
+To do so, two pins were connected together, one used as an output and the other as an input. Then the time difference between generating and receiving an impulse it is taken. This was repeated for a period of time to get a smooth delay distribution.
 
 % plot
 
@@ -76,7 +76,7 @@ The network delay is very important for NTP and PTP. The delay distribution give
 
 % plot
 
-The measured distributions are shown in figure. The localhost measured to get an idea of what delay is caused by the OS itself. For a LAN attached device we get a similar distribution like "lan". It fits the gaussian distribution very well.
+The measured distributions are shown in figure TODO. The localhost measured to get an idea of what delay is caused by the OS itself. For a LAN attached device we get a similar distribution like "lan". It fits the gaussian distribution very well.
 
 The enveloping gaussians are parameterized as the following:
 
@@ -90,7 +90,7 @@ delay-icmp <host>
 
 \subsection{NMEA delay}
 
-Since the GPS module has two different transmission methods to emit a second, a calibration is required. While the PPS line gives us a single digital pulse when a UTC second has started, the serial line tells us which second it was. The delay between those two can be measured and passed to the NTP daemon.
+Since the GPS module has two different transmission methods to emit a second, a calibration is required. While the PPS line gives us a single digital pulse when a UTC second has started, the serial connection tells us which second it was. The delay between those two can be measured and passed to the NTP daemon.
 
 The delay was measured with: 435 +/- 89 ms
 
@@ -122,7 +122,7 @@ time-tools/measure-client rpi1
 time-config time-tools/tconfig/config-...
 \end{lstlisting}
 
-At first we will see how an unsynchronized clocks behaves. Followed by using NTP, PTP and GPS. After that we will compare them in the next chapter. All following measurements were taken with the mainline kernel and static frequency.
+At first we will see how an unsynchronized clocks behaves. Followed by using NTP, PTP and GPS. After that we will compare them in the next chapter. All following measurements were taken with the mainline kernel and constant CPU clock rate.
 
 \subsection{Nonlinear deviation}
 
@@ -160,7 +160,7 @@ We can see the synchronization process in Figure \ref{fig:plot_ntp1}. With the i
 
 \subsection{PTP}
 
-The logical setup is the same as before: \textit{rpi1} as reference clock, \textit{rpi2} and \textit{rpi3} as synchronization targets.
+The topological setup is the same as before: \textit{rpi1} as reference clock, \textit{rpi2} and \textit{rpi3} as synchronization targets.
 
 \begin{figure}[tb]
 	\centering

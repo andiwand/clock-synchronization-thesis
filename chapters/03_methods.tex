@@ -2,13 +2,13 @@ Clock synchronization of multiple devices requires at least one time source to p
 
 \section{General}
 
-We can differentiate between two basic transmission methods, broadcast and client synchronization, and the consequences for the algorithms. Some protocols like PTP are a mixture of both.
+We can distinguish between two basic transmission methods: broadcast and client synchronization. Some protocols like PTP are a mixture of both.
 
 \subsection{Broadcast synchronization}
 
 The easiest method to synchronize time is to broadcast it periodically over a specific media, like radio or wire. This method is widely distributed across different devices. Some examples are: wristwatches, home weather stations, televisions and phones. This is analogous to a time report on the radio.
 
-The broadcast synchronization method relies on the transmission delay of the time signal. The client has to believe the received time and doesn’t know when it was originally sent. To keep the error small the transmission technology has to provide a certainty about the signal delay besides the delay caused by distance. For example Ethernet networks do not provide such a certainty. A "current time" packet could be sent over multiple network nodes which buffer it for some time and forward it afterwards. This could theoretically cause a delay not bound to a specific maximum.
+The broadcast synchronization method relies on the transmission delay of the time signal. The client has to believe the received time and doesn’t know when it was originally sent. To keep the error small the transmission technology has to provide a certainty about the signal delay. For example Ethernet networks do not provide such a certainty. A "current time" packet could be sent over multiple network nodes which buffer it for some time and forward it afterwards. This could theoretically cause a delay not bound to a specific maximum.
 
 One-way communications can only provide this method of time synchronization. Examples are DVB, GPS and radio clock.
 
@@ -64,7 +64,7 @@ Future versions of NTP may bring a 128 bit timestamp, with a 64 bit seconds and 
 	% https://upload.wikimedia.org/wikipedia/commons/8/8d/NTP-Algorithm.svg
 \end{figure}
 
-With NTP the client has the full control of the synchronization process. He can poll different servers on diverse networks to synchronize his clock. As we can see in Figure \ref{fig:ntp_algorithm}, the client has 4 timestamps after such a poll. He can then calculate the time offset θ and the round-trip delay δ.
+With NTP the client has the full control of the synchronization process. It can poll different servers on diverse networks to synchronize its clock. As we can see in Figure \ref{fig:ntp_algorithm}, the client has 4 timestamps after such a poll. He can then calculate the time offset θ and the round-trip delay δ.
 
 \[ \theta = \frac{(t_1 - t_0) + (t_2 - t_3)}{2} \]
 \[ \delta = (t_3 - t_0) - (t_2 - t_1) \]
@@ -83,9 +83,9 @@ The algorithm assumes that both incoming and outgoing routes for server and clie
 
 \section{Precision Time Protocol}
 
-Like NTP, the Precision Time Protocol (PTP) is used to synchronize clocks over packet-switched networks. But PTP promises higher clock accuracy, like sub-microsecond range on LANs. It was published 2002 in the IEEE 1588-2002 standard with the name "Standard for a Precision Clock Synchronization Protocol for Networked Measurement and Control System". The title already suggests that it could fit "Public Devices" very well. Later in 2008 the improved version PTP V2 was released in IEEE 1588-2008 which is backward compatible and improves accuracy, precision and robustness.
+Like NTP, the Precision Time Protocol (PTP) is used to synchronize clocks over packet-switched networks. But PTP promises higher clock accuracy, like sub-microsecond range on LANs. It was published 2002 in the IEEE 1588-2002 standard with the name "Standard for a Precision Clock Synchronization Protocol for Networked Measurement and Control System". The title already suggests that it could fit the needs of "Public Devices" very well. Later in 2008 the improved version PTP V2 was released in IEEE 1588-2008 which is backward compatible and improves accuracy, precision and robustness.
 
-"IEEE 1588 is designed to fill a niche not well served by either of the two dominant protocols, NTP and GPS. IEEE 1588 is designed for local systems requiring accuracies beyond those attainable using NTP. It is also designed for applications that cannot bear the cost of a GPS receiver at each node, or for which GPS signals are inaccessible."
+"IEEE 1588 is designed to fill a niche not well served by either of the two dominant protocols, NTP and GPS. IEEE 1588 is designed for local systems requiring accuracy beyond those attainable using NTP. It is also designed for applications that cannot bear the cost of a GPS receiver at each node, or for which GPS signals are inaccessible."
 
 \section{Algorithm}
 
@@ -109,7 +109,7 @@ A few assumptions are made. First, the exchange of messages happens so fast that
 
 \section{Global Positioning System}
 
-The Global Positioning System (GPS) is a global navigation satellite system (GNSS) set up to provide location and time information all around the world in all weather conditions. To do so, it needs an unobstructed line of sight to four or more GPS satellites. It has no further dependencies of any cellular or internet connection, but can be enhanced by those. The system was created by the US government, which maintains it and makes it freely accessible to anyone.
+The Global Positioning System (GPS) is a global navigation satellite system (GNSS) set up to provide location and time information all around the world under all weather conditions. To do so, it needs an unobstructed line of sight to four or more GPS satellites. It has no further dependencies of any cellular or internet connection, but can be enhanced by those. The system was created by the US government, which maintains it and makes it freely accessible to anyone.
 
 Each satellite transmits its position and time to the earth. A GPS device that receives messages from at least 4 different satellites is able to calculate its position.
 

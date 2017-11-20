@@ -1,9 +1,0 @@
-There are always possible improvements. I want to discuss some of them here.
-First, the delay measurements were always taken without any CPU load. It would be interesting if the PREEMPT\_RT patch performs better with higher load or just isn’t an application for "Public Devices".
-
-Another improvement would be to always use a GPS module with the server. This would remove frequency fluctuations and provide a better ground truth.
-
-Besides the mentioned time synchronization methods there would also be the option to use the PPS signal on multiple devices. But since NTP has such a slow convergence, PTP would be the better solution.
-
-Further, all measurements were taken with the same kernel version. It could be that a newer kernel or PREEMPT\_RT patch performs differently. Therefore I suggest to repeat the measurements to find the best solution for a specific version.
-
