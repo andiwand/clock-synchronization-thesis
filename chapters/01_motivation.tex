@@ -7,7 +7,7 @@
 
 Clock synchronization is a very important topic for distributed systems and security in those. Since "Public Devices" is related to both of these, it is indispensable to resolve time differences as fast and accurate as possible. For Secure Sockets Layer (SSL) or Transport Layer Security (TLS) clock synchronization has the job of telling if a certificate or Certificate Revocation List (CRL) is used in its valid time range (\textit{notBefore} and \textit{notAfter} for the certificate, and \textit{thisUpdate} and \textit{nextUpdate} for the CRL).
 
-%Moreover, it is also important for distributed systems if time matters. For example a file server would store the modified date taken from its own clock. So if the client thinks it is 00:00:00 UTC on 1 January 1970 and the server’s clock is 1 year ahead, the server would insert its own time to the file, which could confuse the client.
+%Moreover, it is also important for distributed systems if time matters. For example a file server would store the modified date taken from its own clock. So if the client thinks it is 00:00:00 UTC on 1 January 1970 and the server's clock is 1 year ahead, the server would insert its own time to the file, which could confuse the client.
 
 Nearly all scientific measurements are related to time. For a distributed measurement system different devices collect data from their connected sources simultaneously. This makes clock synchronization crucial since the data needs to get merged to compare it.
 

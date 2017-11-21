@@ -5,7 +5,7 @@ All measurements were taken under optimal conditions: no CPU load, no RAM load, 
 \section{Setup}
 
 A detailed installation of the measurement environment is described in Appendix D. The devices connected to a GPS module additionally require the setup described in Appendix C.
-The measurements were done with three Raspberry Pis. All of them were connected over Ethernet and a switch. One of them has to transmit a measurement pulse over GPIO 3 to the others’ GPIO 2 like described in the "Time vs time" section.
+The measurements were done with three Raspberry Pis. All of them were connected over Ethernet and a switch. One of them has to transmit a measurement pulse over GPIO 3 to the others' GPIO 2 like described in the "Time vs time" section.
 
 \section{Delays}
 
@@ -20,18 +20,22 @@ The system delay will tell us which kernel to choose. The accuracy of time synch
 
 The OS delay was measured with the tool cyclictest, which was described before.
 
-% plot
+\begin{figure}[tb]
+	\centering
+	\includegraphics[width=1.0\textwidth]{figures/plot_system.png}
+	\caption{System delay}
+	\label{fig:plot_system}
+\end{figure}
 
-This is a plot of the probability density over the delay. Where "rt kernel" stands for the PREEMPT\_RT patched and "std kernel" for the mainline kernel.
+Figure \ref{fig:plot_system} is a plot of the probability density over the delay. Where "rt kernel" stands for the PREEMPT\_RT patched and "std kernel" for the mainline kernel.
 As we can see, the PREEMPT\_RT patch gives us a better delimitation but the mainline kernel provides a higher peak with 88\% at 10 µs.
 
 \begin{center}
-    \begin{tabular}{ | l | r | r | }
+    \begin{tabular}{ | l | r | r | r | }
     \hline
-    \textbf{Target} & \textbf{Average} [ms] & \textbf{Standard deviation} [ms] \\ \hline
-    localhost & 179 & 24 \\ \hline
-    lan & 664 & 69 \\ \hline
-    internet & 25634 & 213 \\ \hline
+    \textbf{Target} & \textbf{Delay avg} [µs] & \textbf{Delay min} [µs] & \textbf{Delay max} [µs] \\ \hline
+    rt & 13 & 9 & 37 \\ \hline
+    std & 10 & 7 & 76 \\ \hline
     \end{tabular}
 \end{center}
 
@@ -46,14 +50,28 @@ rt-tests/cyclictest -m -t1 -p 99 -n -i 400 -l 10000000 -q -H 400
 The general-purpose input/output (GPIO) provides a general, easy to use and fast way to generate and process digital signals. Since the Adafruit GPS module has a pulse per second (PPS) signal output, we want to know how accurate this interface is.
 To do so, two pins were connected together, one used as an output and the other as an input. Then the time difference between generating and receiving an impulse it is taken. This was repeated for a period of time to get a smooth delay distribution.
 
-% plot
+\begin{figure}[tb]
+	\centering
+	\includegraphics[width=1.0\textwidth]{figures/plot_gpio.png}
+	\caption{GPIO delay}
+	\label{fig:plot_gpio}
+\end{figure}
 
-The measured distributions are shown in figure. Where "rt kernel" stands for the PREEMPT\_RT patch and "std kernel" for the standard mainline kernel. In addition, the CPU was configured to stay with a single frequency designated with "no throttling" and the default configuration with "throttling".
-As we can see, configuring the Raspberry Pi to not adopt the CPU’s frequency has a noticeable impact on the delay. The latency with the PREEMPT\_RT patch is not only about 6 times higher, but also more spread out. A wider distribution will also cause a higher error for a time synchronization method that relies on GPIO like GPS.
+The measured distributions are shown in Figure \ref{fig:plot_gpio}. Where "rt kernel" stands for the PREEMPT\_RT patch and "std kernel" for the standard mainline kernel. In addition, the CPU was configured to stay with a single frequency designated with "no throttling" and the default configuration with "throttling".
+As we can see, configuring the Raspberry Pi to not adopt the CPU's frequency has a noticeable impact on the delay. The latency with the PREEMPT\_RT patch is not only about 6 times higher, but also more spread out. A wider distribution will also cause a higher error for a time synchronization method that relies on GPIO like GPS.
 
 The enveloping gaussians are parameterized as the following:
 
-% plot
+\begin{center}
+    \begin{tabular}{ | l | r | }
+    \hline
+    \textbf{Target} & \textbf{Delay} [µs] \\ \hline
+    std kernel + no throttling & 5.0\pm 0.8 \\ \hline
+    std kernel + throttling & 6.7\pm 1.0 \\ \hline
+    rt kernel + no throttling & 29.4\pm 2.5 \\ \hline
+    rt kernel + throttling & 39.5\pm 3.3 \\ \hline
+    \end{tabular}
+\end{center}
 
 The static CPU frequency was configured by adding the following lines to /boot/config.txt:
 \begin{lstlisting}[language=bash]
@@ -72,15 +90,28 @@ time-tools/measure-client 127.0.0.1 &
 
 \subsection{Network delay}
 
-The network delay is very important for NTP and PTP. The delay distribution gives a first estimation of the synchronization error. With the assumption that the delay is the same in both directions and it doesn’t vary too much, the error can be reduced by statistical methods like described in the NTP and PTP chapter.
+The network delay is very important for NTP and PTP. The delay distribution gives a first estimation of the synchronization error. With the assumption that the delay is the same in both directions and it doesn't vary too much, the error can be reduced by statistical methods like described in the NTP and PTP chapter.
 
-% plot
+\begin{figure}[tb]
+	\centering
+	\includegraphics[width=1.0\textwidth]{figures/plot_network.png}
+	\caption{Network delay}
+	\label{fig:plot_network}
+\end{figure}
 
-The measured distributions are shown in figure TODO. The localhost measured to get an idea of what delay is caused by the OS itself. For a LAN attached device we get a similar distribution like "lan". It fits the gaussian distribution very well.
+The measured distributions are shown in Figure \ref{fig:plot_network}. The localhost measured to get an idea of what delay is caused by the OS itself. For a LAN attached device we get a similar distribution like "lan". It fits the gaussian distribution very well.
 
 The enveloping gaussians are parameterized as the following:
 
-% table
+\begin{center}
+    \begin{tabular}{ | l | r | }
+    \hline
+    \textbf{Target} & \textbf{Delay} [ms] \\ \hline
+    localhost & 179\pm 24 \\ \hline
+    lan & 664\pm 69 \\ \hline
+    internet & 25634\pm 213 \\ \hline
+    \end{tabular}
+\end{center}
 
 Issued command:
 
@@ -92,7 +123,7 @@ delay-icmp <host>
 
 Since the GPS module has two different transmission methods to emit a second, a calibration is required. While the PPS line gives us a single digital pulse when a UTC second has started, the serial connection tells us which second it was. The delay between those two can be measured and passed to the NTP daemon.
 
-The delay was measured with: 435 +/- 89 ms
+The delay was measured with: (435\pm 89) ms
 
 Issued command:
 
@@ -100,7 +131,7 @@ Issued command:
 delay-nmea -s ~/time-experiments.c/nmea_pulse /dev/ttyS0 ~/time-experiments.c/pps_pulse /dev/pps0
 \end{lstlisting}
 
-\section{Time vs time}
+\section{Time deviation}
 
 The following measurements were taken to see the moving time offset of connected Raspberry Pis to a chosen norm. With the help of that we can visualize the process of time synchronization with a resolution of a few µs.
 
@@ -149,7 +180,7 @@ The following measurement was taken with \textit{rpi1} as reference clock, \text
 	\label{fig:plot_ntp1}
 \end{figure}
 
-We can see the synchronization process in Figure \ref{fig:plot_ntp1}. With the initiation of the NTP daemon the target clock's phase is adjusted to about 0.1 ms relative to the reference clock. Then the frequency adjustment begins. In this case the target’s clock frequency is very badly conditioned in comparison to the reference. NTP took about 14 h to fix this issue. Figure \ref{fig:plot_ntp2} shows the continuous time oscillation after the synchronization is done. This leads to an accuracy of about 0.2 ms.
+We can see the synchronization process in Figure \ref{fig:plot_ntp1}. With the initiation of the NTP daemon the target clock's phase is adjusted to about 0.1 ms relative to the reference clock. Then the frequency adjustment begins. In this case the target's clock frequency is very badly conditioned in comparison to the reference. NTP took about 14 h to fix this issue. Figure \ref{fig:plot_ntp2} shows the continuous time oscillation after the synchronization is done. This leads to an accuracy of about 0.2 ms.
 
 \begin{figure}[tb]
 	\centering
@@ -169,7 +200,7 @@ The topological setup is the same as before: \textit{rpi1} as reference clock, \
 	\label{fig:plot_ptp1}
 \end{figure}
 
-With the initiation of the PTP daemon the target’s clock phase is adjusted to about 0.1 ms relative to the reference clock like shown in Figure \ref{fig:plot_ptp1}. The frequency adjustment takes over and completes in about 6 minutes. The accuracy gets very close to the measurement error with about 10 µs as we can see in Figure \ref{fig:plot_ptp2}.
+With the initiation of the PTP daemon the target's clock phase is adjusted to about 0.1 ms relative to the reference clock like shown in Figure \ref{fig:plot_ptp1}. The frequency adjustment takes over and completes in about 6 minutes. The accuracy gets very close to the measurement error with about 10 µs as we can see in Figure \ref{fig:plot_ptp2}.
 
 \begin{figure}[tb]
 	\centering

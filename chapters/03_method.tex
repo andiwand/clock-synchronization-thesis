@@ -1,4 +1,4 @@
-Clock synchronization of multiple devices requires at least one time source to provide the ground truth. The goal of the synchronization is to get the target’s clock as close as possible to the one of the source.
+Clock synchronization of multiple devices requires at least one time source to provide the ground truth. The goal of the synchronization is to get the target's clock as close as possible to the one of the source.
 
 \section{General}
 
@@ -8,7 +8,7 @@ We can distinguish between two basic transmission methods: broadcast and client 
 
 The easiest method to synchronize time is to broadcast it periodically over a specific media, like radio or wire. This method is widely distributed across different devices. Some examples are: wristwatches, home weather stations, televisions and phones. This is analogous to a time report on the radio.
 
-The broadcast synchronization method relies on the transmission delay of the time signal. The client has to believe the received time and doesn’t know when it was originally sent. To keep the error small the transmission technology has to provide a certainty about the signal delay. For example Ethernet networks do not provide such a certainty. A "current time" packet could be sent over multiple network nodes which buffer it for some time and forward it afterwards. This could theoretically cause a delay not bound to a specific maximum.
+The broadcast synchronization method relies on the transmission delay of the time signal. The client has to believe the received time and doesn't know when it was originally sent. To keep the error small the transmission technology has to provide a certainty about the signal delay. For example Ethernet networks do not provide such a certainty. A "current time" packet could be sent over multiple network nodes which buffer it for some time and forward it afterwards. This could theoretically cause a delay not bound to a specific maximum.
 
 One-way communications can only provide this method of time synchronization. Examples are DVB, GPS and radio clock.
 
@@ -22,7 +22,7 @@ A popular example is NTP, while PTP is a combination of both: broadcast and clie
 
 \section{Network Time Protocol}
 
-The Network Time Protocol (NTP) synchronizes clocks of different devices over packet-switched, variable-latency networks. It is in operation since about 1985 and therefore one of the oldest Internet protocol in use. NTP was designed by David L. Mills at the University of Delaware.
+The Network Time Protocol (NTP) synchronizes clocks of different devices over packet-switched, variable-latency networks.\cite{mills_2010} It is in operation since about 1985 and therefore one of the oldest Internet protocol in use. NTP was designed by David L. Mills at the University of Delaware.
 
 NTP was invented to synchronize computer clocks within a few milliseconds of Coordinated Universal Time (UTC). It can achieve an accuracy within tens of milliseconds over the Internet or hundreds of microseconds in local area networks. Errors are caused by asymmetric routes and network congestion which results in 100 ms or more offset.
 
@@ -50,7 +50,7 @@ Figure \ref{fig:ntp_strata} shows an example of a logical NTP topology.
 
 \subsection{Timestamps}
 
-The NTP timestamp is 64 bits long and consists of a 32 bit seconds and a 32 bit fractional seconds part. That means it can represent about 136 years divided by a step size of about 233 picoseconds. NTP’s zero in time is January 1, 1900 at 00:00:00 UTC, therefore the first roll will be on February 7, 2036.
+The NTP timestamp is 64 bits long and consists of a 32 bit seconds and a 32 bit fractional seconds part. That means it can represent about 136 years divided by a step size of about 233 picoseconds. NTP's zero in time is January 1, 1900 at 00:00:00 UTC, therefore the first roll will be on February 7, 2036.
 
 Future versions of NTP may bring a 128 bit timestamp, with a 64 bit seconds and a 64 bit fractional seconds part. NTP inventor Mills said "the 64 bit value for the fraction is enough to resolve the amount of time it takes a photon to pass an electron at the speed of light. The 64 bit second value is enough to provide unambiguous time representation until the universe goes dim".
 
@@ -83,15 +83,20 @@ The algorithm assumes that both incoming and outgoing routes for server and clie
 
 \section{Precision Time Protocol}
 
-Like NTP, the Precision Time Protocol (PTP) is used to synchronize clocks over packet-switched networks. But PTP promises higher clock accuracy, like sub-microsecond range on LANs. It was published 2002 in the IEEE 1588-2002 standard with the name "Standard for a Precision Clock Synchronization Protocol for Networked Measurement and Control System". The title already suggests that it could fit the needs of "Public Devices" very well. Later in 2008 the improved version PTP V2 was released in IEEE 1588-2008 which is backward compatible and improves accuracy, precision and robustness.
+Like NTP, the Precision Time Protocol (PTP) is used to synchronize clocks over packet-switched networks.\cite{eidson_2005,eidson_2006} But PTP promises higher clock accuracy, like sub-microsecond range on LANs. It was published 2002 in the IEEE 1588-2002 standard with the name "Standard for a Precision Clock Synchronization Protocol for Networked Measurement and Control System". The title already suggests that it could fit the needs of "Public Devices" very well. Later in 2008 the improved version PTP V2 was released in IEEE 1588-2008 which is backward compatible and improves accuracy, precision and robustness.
 
-"IEEE 1588 is designed to fill a niche not well served by either of the two dominant protocols, NTP and GPS. IEEE 1588 is designed for local systems requiring accuracy beyond those attainable using NTP. It is also designed for applications that cannot bear the cost of a GPS receiver at each node, or for which GPS signals are inaccessible."
+"IEEE 1588 is designed to fill a niche not well served by either of the two dominant protocols, NTP and GPS. IEEE 1588 is designed for local systems requiring accuracy beyond those attainable using NTP. It is also designed for applications that cannot bear the cost of a GPS receiver at each node, or for which GPS signals are inaccessible."\cite{eidson_book}
 
 \section{Algorithm}
 
-% figure
+\begin{figure}[tb]
+	\centering
+	\includegraphics[width=0.7\textwidth]{figures/ptp_algorithm.png}
+	\caption{Measurement process of the different timestamps}
+	\label{fig:ptp_algorithm}
+\end{figure}
 
-The master periodically broadcasts his current time $t_1$ as a \textit{Sync} message to the slaves. Under IEEE 1588-2002 broadcasts are up to once per second. Under IEEE 1588-2008, up to 10 per second are permitted. The slaves record the timestamp $t_2$ on receiving the \textit{Sync} message.
+The master periodically broadcasts his current time $t_1$ as a \textit{Sync} message to the slaves like shown in Figure \ref{fig:ptp_algorithm}. Under IEEE 1588-2002 broadcasts are up to once per second. Under IEEE 1588-2008, up to 10 per second are permitted. The slaves record the timestamp $t_2$ on receiving the \textit{Sync} message.
 
 The \textit{Follow\_Up} message is optionally. Not all masters have the ability to provide an accurate timestamp right at sending the \textit{Sync} message. With common hardware and OS the best estimation of $t_1$ is right after the transmission is complete. This limitation leads the master to send the \textit{Follow\_Up} message to propagate $t_1$.
 
@@ -109,10 +114,10 @@ A few assumptions are made. First, the exchange of messages happens so fast that
 
 \section{Global Positioning System}
 
-The Global Positioning System (GPS) is a global navigation satellite system (GNSS) set up to provide location and time information all around the world under all weather conditions. To do so, it needs an unobstructed line of sight to four or more GPS satellites. It has no further dependencies of any cellular or internet connection, but can be enhanced by those. The system was created by the US government, which maintains it and makes it freely accessible to anyone.
+The Global Positioning System (GPS) is a global navigation satellite system (GNSS) set up to provide location and time information all around the world under all weather conditions.\cite{gps_sps,gps_waas} To do so, it needs an unobstructed line of sight to four or more GPS satellites. It has no further dependencies of any cellular or internet connection, but can be enhanced by those. The system was created by the US government, which maintains it and makes it freely accessible to anyone.
 
 Each satellite transmits its position and time to the earth. A GPS device that receives messages from at least 4 different satellites is able to calculate its position.
 
 As GPS is very time sensitive, each satellite carries a very stable atomic clock which is synchronized with another one and ground clocks. The clock drift is corrected every day.
-These very accurate clocks can be used to synchronize a computer’s clock within nanoseconds.
+These very accurate clocks can be used to synchronize a computer's clock within nanoseconds.
 
