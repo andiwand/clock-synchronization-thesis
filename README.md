@@ -5,7 +5,7 @@ For a distributed measurement system, like the "Public Devices" project, synchro
 
 letex inspired by https://github.com/joerg/abschlussarbeit-tuwien-physik
 
-# Related repositories
+## Related repositories
 
 - https://github.com/andiwand/time-experiments
 - https://github.com/andiwand/time-config
